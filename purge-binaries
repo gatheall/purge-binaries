@@ -1,9 +1,9 @@
 #!/usr/local/bin/perl
-# purge-binaries, v1.0d
+# purge-binaries, v1.0e
 #
 #-------------------------------------------------------------------------------
 # Introduction
-#   purge-binaries scans news postings, purging those it determins are
+#   purge-binaries scans news postings, purging those it determines to be
 #   binary files.  It is designed to work as a channel with inn, although
 #   it should be possible to feed it output from "ls -l" too.  Results are
 #   logged.
@@ -29,7 +29,7 @@
 #
 #   which will process articles in every newsgroup.  If you'd prefer, you
 #   can modify this entry to restrict attention to certain hierarchies
-#   and/or newsgroups.
+#   and/or newsgroups.  See newsfeeds(5).
 #
 #   Note that this channel is fed overview data so crossposted articles will
 #   be handled properly.
@@ -53,6 +53,10 @@
 #
 #   12-Jun-95, GAT, v1.0d
 #      - Tweaked isbinary() to better handle MIME-encoded files again.
+#
+#   25-Jan-96, GAT, v1.0e
+#      - Tweaked isbinary() so that identifying MIME attachments using
+#        a header line is case-insensitive.
 #
 #-------------------------------------------------------------------------------
 
