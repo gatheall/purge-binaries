@@ -1,0 +1,146 @@
+#!/usr/local/bin/perl
+# purge-binaries, v1.0a
+#
+#-------------------------------------------------------------------------------
+# Introduction
+#   purge-binaries scans news postings, purging those it determins are
+#   binary files.  It is designed to work as a channel with inn, although
+#   it should be possible to feed it output from "ls -l" too.  Results are
+#   logged.
+#
+#   To run, you will need Perl v4.0 or better as well as the ctime.pl 
+#   routine that emulates ctime(3C).
+#
+#   purge-binaries is written by George A. Theall, theall@tifaware.com.
+#   You may freely use and redistribute this.  I can not offer any
+#   support for this but am interested in your comments, suggestions,
+#   and problem reports.
+#
+#   The latest version is available as:
+#      http://www.tifaware.com/perl/purge-binaries/
+#
+#-------------------------------------------------------------------------------
+# Operation
+#   By design, purge-binaries operates as a channel with inn, checking each
+#   article as it arrives and deleting binaries.  To use, add an entry like 
+#   the following to your newsfeeds file:
+#
+#      purge-binaries:*:Tc,WbO:/usr/local/news/bin/purge-binaries
+#
+#   which will process articles in every newsgroup.  If you'd prefer, you
+#   can modify this entry to restrict attention to certain hierarchies
+#   and/or newsgroups.
+#
+#   Note that this channel is fed overview data so crossposted articles will
+#   be handled properly.
+#
+#-------------------------------------------------------------------------------
+# History
+#   02-May-95, GAT, v1.0a
+#      - Initial version.
+#
+#-------------------------------------------------------------------------------
+
+
+require "ctime.pl";			# needed for ctime()
+
+
+# Define initial values for selected variables.
+$DEBUG = 0;				# if set, do *NOT* unlink
+$encodedpct = 50;			# % lines encoded as cutoff
+$logfile = "/usr/adm/news/binary.log";	# file for logging
+$minsize = 5000;			# ignore files smaller than this
+$maxlines = 1000;			# number of lines to test
+$totbytes = $totfiles = 0;		# number of bytes and files deleted
+
+
+# Open log file, turn off buffering, and print start time.
+open(LOG, ">> $logfile") || die "*** unable to open logfile: $! ***";
+select((select(LOG), $|=1)[$[]);
+print LOG "-" x 78 . "\n";
+print LOG "$0 started " . &ctime(time);
+
+
+# For each post.
+while (<STDIN>) {
+	# Ignore "small" posts.
+	$_ =~ s/^(\d+) //;
+	$bytes = $1;
+	next unless ($bytes >= $minsize);
+
+
+	# Test one of the articles and delete the post as necessary.
+	chop;
+	@files = split(' ', (split('\t', $_))[0]);
+	if ( ($why = &isBinary($files[0])) ne "" ) {
+		print LOG "$files[0]; $bytes bytes; $why\n";
+		foreach (@files) {
+			print LOG "\t$_ purged\n";
+			$DEBUG || unlink "$_" || warn "failed to unlink $_ - $!";
+			++$totfiles;
+		}
+		$totbytes += $bytes;
+	}
+}
+
+
+# Print final status.
+print LOG "$0 ended " . &ctime(time) ;
+print LOG "$totfiles files ($totbytes bytes) purged\n";
+
+
+# Close log and exit.
+close(LOG);
+exit(0);
+
+
+####################################################
+#  isBinary - determines if a file is a binary.    #
+#                                                  #
+#  Notes:                                          #
+#      - Posts in a *.answers newsgroup or with    #
+#        something like FAQ in the subject line    #
+#        are ignored.                              #
+#      - Some messages are incorrectly identified  #
+#        as binaries because of bad MIME headers.  #
+#                                                  #
+#  Entry:                                          #
+#        file = filename                           #
+#  Exit:                                           #
+#        string indicating reason to delete post.  #
+####################################################
+sub isBinary {
+	local($file) = @_;
+	local($lines, $mimelines, $uulines) = 0;
+	local($reason) = "";
+
+
+	# Scan through the article for questionable signs
+	open(ARTICLE, "$file") || die "*** unable to open $file: $! ***";
+	while (<ARTICLE>) {
+		++$lines;
+
+		last if ($lines > $maxlines);
+		last if ($_ =~ /^Newsgroups:\s+.*\.answers/);
+		last if ($_ =~ /^Subject:.*(FAQ|Frequently Asked Questions)/);
+
+		if ($_ =~ /^Content-Type:\s+([iI]mage|[aA]pplication)/) {
+			$reason = "binary|MIME";
+			last;
+		}
+		elsif ($_ =~ /^(\s|>|;)*M.{60}\s*$/) {
+			++$uulines;
+		}
+		elsif ($_ =~ /^\S{61}\s*$/) {
+			++$mimelines;
+		}
+	}
+	close(ARTICLE);
+	if (100*$uulines/$lines > $encodedpct) {
+		$reason = "uuencoded ($uulines/$lines)";
+	}
+	elsif (100*$mimelines/$lines > $encodedpct) {
+		$reason = "mime encoded ($mimelines/$lines)";
+	}
+	return $reason;
+}
