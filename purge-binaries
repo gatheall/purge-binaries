@@ -1,5 +1,5 @@
 #!/usr/local/bin/perl
-# purge-binaries, v1.0b
+# purge-binaries, v1.0c
 #
 #-------------------------------------------------------------------------------
 # Introduction
@@ -46,6 +46,10 @@
 #
 #   10-May-95, GAT, v1.0b
 #      - Tweaked isbinary() to better handle MIME-encoded files.
+#
+#   15-May-95, GAT, v1.0c
+#      - Now scans messages with "FAQ" or "Frequently Asked Questions" in 
+#        the subject line.
 #
 #-------------------------------------------------------------------------------
 
@@ -106,9 +110,8 @@ exit(0);
 #  isBinary - determines if a file is a binary.    #
 #                                                  #
 #  Notes:                                          #
-#      - Posts in a *.answers newsgroup or with    #
-#        something like FAQ in the subject line    #
-#        are ignored.                              #
+#      - Posts in a *.answers newsgroup are        #
+#        ignored.                                  #
 #      - Some messages are incorrectly identified  #
 #        as binaries because of bad MIME headers.  #
 #                                                  #
@@ -130,7 +133,6 @@ sub isBinary {
 
 		last if ($lines > $maxlines);
 		last if ($_ =~ /^Newsgroups:\s+.*\.answers/);
-		last if ($_ =~ /^Subject:.*(FAQ|Frequently Asked Questions)/);
 
 		if ($_ =~ /^Content-Type:\s+([iI]mage|[aA]pplication)/) {
 			$reason = "binary|MIME";
