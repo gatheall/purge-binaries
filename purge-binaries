@@ -1,5 +1,5 @@
 #!/usr/local/bin/perl
-# purge-binaries, v1.0a
+# purge-binaries, v1.0b
 #
 #-------------------------------------------------------------------------------
 # Introduction
@@ -16,7 +16,7 @@
 #   support for this but am interested in your comments, suggestions,
 #   and problem reports.
 #
-#   The latest version is available as:
+#   The latest version is available through
 #      http://www.tifaware.com/perl/purge-binaries/
 #
 #-------------------------------------------------------------------------------
@@ -34,10 +34,18 @@
 #   Note that this channel is fed overview data so crossposted articles will
 #   be handled properly.
 #
+#   You may want to adjust some of the parameters below to improve
+#   performance or whatnot. One word of warning though - lowering the
+#   percentage of encoding will increase the risk of falsely identifying
+#   a post as a binary.
+#
 #-------------------------------------------------------------------------------
 # History
 #   02-May-95, GAT, v1.0a
 #      - Initial version.
+#
+#   10-May-95, GAT, v1.0b
+#      - Tweaked isbinary() to better handle MIME-encoded files.
 #
 #-------------------------------------------------------------------------------
 
@@ -128,10 +136,10 @@ sub isBinary {
 			$reason = "binary|MIME";
 			last;
 		}
-		elsif ($_ =~ /^(\s|>|;)*M.{60}\s*$/) {
+		elsif ($_ =~ /^(\s|>|;)*M.{60,61}\s*$/) {
 			++$uulines;
 		}
-		elsif ($_ =~ /^\S{61}\s*$/) {
+		elsif ($_ =~ /^[^M~]\S{60,63}\s*$/) {
 			++$mimelines;
 		}
 	}
