@@ -1,5 +1,6 @@
 #!/usr/local/bin/perl
-# purge-binaries, v1.0f
+# 
+# $Id$
 #
 #-------------------------------------------------------------------------------
 # Introduction
@@ -38,29 +39,6 @@
 #   performance or whatnot. One word of warning though - lowering the
 #   percentage of encoding will increase the risk of falsely identifying
 #   a post as a binary.
-#
-#-------------------------------------------------------------------------------
-# History
-#   02-May-95, GAT, v1.0a
-#      - Initial version.
-#
-#   10-May-95, GAT, v1.0b
-#      - Tweaked isbinary() to better handle MIME-encoded files.
-#
-#   15-May-95, GAT, v1.0c
-#      - Now scans messages with "FAQ" or "Frequently Asked Questions" in 
-#        the subject line.
-#
-#   12-Jun-95, GAT, v1.0d
-#      - Tweaked isbinary() to better handle MIME-encoded files again.
-#
-#   25-Jan-96, GAT, v1.0e
-#      - Tweaked isbinary() so that identifying MIME attachments using
-#        a header line is case-insensitive.
-#
-#   07-Feb-96, GAT, v1.0f
-#      - Tweaked isbinary() to identify other types of binaries such as
-#        audio and video files.
 #
 #-------------------------------------------------------------------------------
 
