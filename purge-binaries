@@ -1,5 +1,5 @@
 #!/usr/local/bin/perl
-# purge-binaries, v1.0e
+# purge-binaries, v1.0f
 #
 #-------------------------------------------------------------------------------
 # Introduction
@@ -8,7 +8,7 @@
 #   it should be possible to feed it output from "ls -l" too.  Results are
 #   logged.
 #
-#   To run, you will need Perl v4.0 or better as well as the ctime.pl 
+#   To run, you will need Perl 4.0 or better as well as the ctime.pl 
 #   routine that emulates ctime(3C).
 #
 #   purge-binaries is written by George A. Theall, theall@tifaware.com.
@@ -57,6 +57,10 @@
 #   25-Jan-96, GAT, v1.0e
 #      - Tweaked isbinary() so that identifying MIME attachments using
 #        a header line is case-insensitive.
+#
+#   07-Feb-96, GAT, v1.0f
+#      - Tweaked isbinary() to identify other types of binaries such as
+#        audio and video files.
 #
 #-------------------------------------------------------------------------------
 
@@ -141,7 +145,8 @@ sub isBinary {
 		last if ($lines > $maxlines);
 		last if ($_ =~ /^Newsgroups:\s+.*\.answers/);
 
-		if ($_ =~ /^Content-Type:\s+([iI]mage|[aA]pplication)/) {
+		# NB: ignore case when checking for a match!
+		if ($_ =~ /^Content-Type:\s+(application|audio|image|video)/i) {
 			$reason = "binary|MIME";
 			last;
 		}
