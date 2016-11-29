@@ -1,7 +1,5 @@
 #!/usr/local/bin/perl
 # 
-# $Id$
-#
 #-------------------------------------------------------------------------------
 # Introduction
 #   purge-binaries scans news postings, purging those it determines to be
@@ -18,7 +16,7 @@
 #   and problem reports.
 #
 #   The latest version is available through
-#      http://www.tifaware.com/perl/purge-binaries/
+#      https://github.com/gatheall/purge-binaries
 #
 #-------------------------------------------------------------------------------
 # Operation
